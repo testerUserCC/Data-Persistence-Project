@@ -3,74 +3,184 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
+using UnityEngine.SocialPlatforms.Impl;
+using UnityEngine.SocialPlatforms;
+using TMPro;
+using System.Linq;
+
 
 public class MainManager : MonoBehaviour
 {
-    public Brick BrickPrefab;
-    public int LineCount = 6;
-    public Rigidbody Ball;
+    public static MainManager Instance;
 
-    public Text ScoreText;
-    public GameObject GameOverText;
-    
-    private bool m_Started = false;
-    private int m_Points;
-    
-    private bool m_GameOver = false;
+    public TextMeshProUGUI[] scoreTextList = new TextMeshProUGUI[7];
+    public string[] nameList = new string[7];
+    public int[] scoreList = new int[7];
 
-    
-    // Start is called before the first frame update
-    void Start()
+    public string playerName;
+    public int playerScore;
+
+    /*public int difficulty;
+    public int initScore;
+    public int highestScore;
+
+    public int loadDifficulty;
+    public int loadScore;
+    public int loadHighestScore;*/
+
+    private void Awake()
     {
-        const float step = 0.6f;
-        int perLine = Mathf.FloorToInt(4.0f / step);
-        
-        int[] pointCountArray = new [] {1,1,2,2,5,5};
-        for (int i = 0; i < LineCount; ++i)
+        if (Instance != null)
         {
-            for (int x = 0; x < perLine; ++x)
+            Destroy(gameObject);
+            return;
+        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+
+    }
+
+    public void CallEm()
+    {
+        UpdateScore();
+        StartCoroutine(WaitAndUpdate());
+    }
+    [System.Serializable]
+    class SaveData
+    {
+        public string[] playerName = new string[7];
+        public int[] playerScore = new int[7];
+
+        //public string playerName;
+        /*public int difficulty;
+        public int initScore;
+        public int highestScore;
+
+        public int loadDifficulty;
+        public int loadScore;
+        public int loadHighestScore;*/
+    }
+    public void SavePlayerSettings(string pName, int score)//,int diffLvl,int score)
+    {
+        Debug.Log($"1.0 Saving playerName: {pName}, and his score: {score}");
+            playerName = pName;
+            playerScore = score;
+        //difficulty = diffLvl;
+        //initScore = score;
+        Debug.Log($"1.1 Saving playerName: {pName} || {playerName}, and his score: {score} || {playerScore}");
+        SaveData savingTemp = new()
             {
-                Vector3 position = new Vector3(-1.5f + step * x, 2.5f + i * 0.3f, 0);
-                var brick = Instantiate(BrickPrefab, position, Quaternion.identity);
-                brick.PointValue = pointCountArray[i];
-                brick.onDestroyed.AddListener(AddPoint);
-            }
+                playerName = nameList,
+                //difficulty = diffLvl,
+                playerScore = scoreList,
+
+            };
+        Debug.Log($"1.2 Saving playerName: {pName} || {playerName}, and his score: {score} || {playerScore}");
+        Debug.Log($"1.3 Saving playerName: {nameList[0]}, and his score: {scoreList[0]}");
+        string json = JsonUtility.ToJson(savingTemp);
+            File.WriteAllText(Application.persistentDataPath + "/players.json", json);
+        UpdateScore();
+    }
+    public void LoadPlayerSettings()//, int lDiffValue)
+    {
+        //playerName = lPName;
+        //difficulty = lDiffValue;
+        //initScore = 0;
+        string path = Application.persistentDataPath + "/players.json";
+        if (File.Exists(path))
+        {
+
+            string json = File.ReadAllText(path);
+            SaveData loadDataTemp = JsonUtility.FromJson<SaveData>(json);
+
+            nameList = loadDataTemp.playerName;
+            scoreList = loadDataTemp.playerScore;
+            //playerName = loadDataTemp.playerName;
+            //loadDifficulty = loadDataTemp.difficulty;
+            //loadScore = loadDataTemp.initScore;
         }
     }
-
-    private void Update()
+    public void UpdateScore()
     {
-        if (!m_Started)
+        int index = scoreList.Length;
+
+        Debug.Log($"2.1 index value is: {index} because scoreList.Length is: {scoreList.Length}");
+        Debug.Log($"2.2 scoreList[index - 1] is: {scoreList[index - 1]}, and playerScore is: {playerScore}, and index is: {index}");
+        while ((scoreList[index - 1] < playerScore) && index > -1)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                m_Started = true;
-                float randomDirection = Random.Range(-1.0f, 1.0f);
-                Vector3 forceDir = new Vector3(randomDirection, 1, 0);
-                forceDir.Normalize();
-
-                Ball.transform.SetParent(null);
-                Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
-            }
+            Debug.Log($"2.3 scoreList[index - 1] is: {scoreList[index - 1]}, and playerScore is: {playerScore}, and index is: {index}");
+            index-=1;
+            Debug.Log($"2.4 scoreList[index - 1] is: {scoreList[index - 1]}, and playerScore is: {playerScore}, and index is: {index}");
         }
-        else if (m_GameOver)
+
+        if (index == scoreList.Length - 1)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            scoreList[index] = playerScore;
+            nameList[index] = playerName;
+        }
+        else if (index < scoreList.Length - 1)
+        {
+            for (int i = scoreList.Length - 1; i > index; i--)
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+                scoreList[i] = scoreList[i - 1];
+                nameList[i] = nameList[i - 1];
             }
+
+            scoreList[index] = playerScore;
+            nameList[index] = playerName;
         }
     }
-
-    void AddPoint(int point)
+    IEnumerator WaitAndUpdate()
     {
-        m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        yield return new WaitForSeconds(1);
+        UpdateTextList();
+    }
+    public void UpdateTextList()
+    {
+
+
+        for (int i = 0; i < nameList.Length; i++)
+        {
+            scoreTextList[i] = GameObject.Find("Canvas").transform.Find("NameAndScore" + i).GetComponent<TextMeshProUGUI>();
+
+
+            string name = nameList[i];
+            int score = scoreList[i];
+
+            int totalLength = 20;
+
+            string formattedString = string.Format("{0,-10}{1,10}", name, score);
+            scoreTextList[i].SetText(formattedString.PadRight(totalLength));
+        }
+
     }
 
-    public void GameOver()
+
+
+    /*public void SaveLeaderBoard(string[] lbPname, int lbScore)
     {
-        m_GameOver = true;
-        GameOverText.SetActive(true);
+        playerName = lbPname[0];
+        highestScore = Mathf.Max(lbScore, loadScore <= 0 ? 0 : loadScore);
+        SaveData savingLB = new()
+        {
+            playerName = lbPname,
+            highestScore = Mathf.Max(lbScore, highestScore)
+        };
+        string json = JsonUtility.ToJson(savingLB);
+        File.AppendText(Application.persistentDataPath + "/LeaderBoard.json");
+        //File.WriteAllText(Application.persistentDataPath + "/LeaderBoard.json", json);
     }
+    public void LoadLeaderBoard()
+    {
+        string path = Application.persistentDataPath + "/LeaderBoard.json";
+        if (File.Exists(path))
+        {
+            string json = File.ReadAllText(path);
+            SaveData loadDataLB = JsonUtility.FromJson<SaveData>(json);
+            playerName = loadDataLB.playerName;
+            loadHighestScore = loadDataLB.highestScore;
+        }
+    }*/
 }
