@@ -12,7 +12,6 @@ using UnityEngine.UI;
 
 public class UIMainMenuManager : MonoBehaviour
 {
-    //public MainManager mainManager;
     public int difficultyValue = 1;
     public TMP_InputField inputname;
     public TextMeshProUGUI highestScore;
@@ -23,14 +22,10 @@ public class UIMainMenuManager : MonoBehaviour
     void Start()
     {
         MainManager.Instance.LoadPlayerSettings();
-        //MainManager.Instance.CallEm();
-        //highestScore.text = "Playar: " + MainManager.Instance.playerName + "| Score: " +MainManager.Instance.loadHighestScore.ToString();
-        //HighScoreView.text.Insert(0, highestScore.text);
     }
 
     public void ButtonClicked(int diff)
     {
-        // Set the value when the button is clicked
         if (diff == 1)
         { 
             difficultyValue = 1;
@@ -46,16 +41,7 @@ public class UIMainMenuManager : MonoBehaviour
     public void StartNew()
     {
         playerName = inputname.text;
-        /*string path = Application.persistentDataPath + "/players.json";
-        if (File.Exists(path))
-        {
-            MainManager.Instance.LoadPlayerSettings(playerName);//, difficultyValue);
-        }
-        else
-        {*/
-            MainManager.Instance.SavePlayerSettings(playerName,0);//, difficultyValue, 0);
-            
-        //}
+        MainManager.Instance.SavePlayerSettings(playerName,0);
         SceneManager.LoadScene(1);
     }
     public void Exit()

@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     private bool m_Started = false;
     private int m_Points;
 
-    private bool m_GameOver = false;
+    public bool m_GameOver = false;
 
     // Start is called before the first frame update
     void Start()
@@ -57,7 +57,7 @@ public class GameManager : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                SceneManager.LoadScene(0);
+                SceneManager.LoadScene(2);
             }
         }
     }
@@ -65,9 +65,8 @@ public class GameManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
-        MainManager.Instance.SavePlayerSettings(MainManager.Instance.playerName,m_Points);//,MainManager.Instance.difficulty, m_Points);
-        //MainManager.Instance.SaveLeaderBoard(MainManager.Instance.playerName, m_Points);
-        //MainManager.Instance.CallEm();
+        MainManager.Instance.SavePlayerSettings(MainManager.Instance.playerName,m_Points);
+        MainManager.Instance.CallEm();
     }
     void AddPoint(int point)
     {
