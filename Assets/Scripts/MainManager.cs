@@ -16,6 +16,8 @@ public class MainManager : MonoBehaviour
     public string playerName;
     public int playerScore;
 
+    public int difficultyVector;
+
 
     private void Awake()
     {
@@ -35,6 +37,9 @@ public class MainManager : MonoBehaviour
         UpdateScore();
         SavingToFile();
     }
+
+    public void SetDifficultyValue(int difficultyValue) { difficultyVector = difficultyValue; }
+
     [System.Serializable]
     class SaveData
     {
@@ -83,11 +88,18 @@ public class MainManager : MonoBehaviour
         while ((scoreList[AIndex] > playerScore) && AIndex < scoreList.Length)
         {
             AIndex++;
+            if(AIndex>= scoreList.Length)
+            { AIndex = scoreList.Length-1;
+                break;
+            }
         }
         if (AIndex == scoreList.Length - 1)
         {
+            if (scoreList[AIndex] <= playerScore)
+            { 
             scoreList[AIndex] = playerScore;
             nameList[AIndex] = playerName;
+            }
         }
 
         else if (AIndex < scoreList.Length - 1)

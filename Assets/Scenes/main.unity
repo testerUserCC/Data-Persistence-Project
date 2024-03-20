@@ -560,6 +560,7 @@ MonoBehaviour:
   scoreList: 00000000000000000000000000000000000000000000000000000000
   playerName: 
   playerScore: 0
+  difficultyVector: 0
 --- !u!1 &455529321
 GameObject:
   m_ObjectHideFlags: 0
@@ -757,8 +758,10 @@ MonoBehaviour:
   LineCount: 6
   Ball: {fileID: 177912862}
   ScoreText: {fileID: 188020406}
+  highestScore: {fileID: 2078529056}
   GameOverText: {fileID: 474497238}
   m_GameOver: 0
+  diffValue: 0
 --- !u!1 &610430368
 GameObject:
   m_ObjectHideFlags: 0

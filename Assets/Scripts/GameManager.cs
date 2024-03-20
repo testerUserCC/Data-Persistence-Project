@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.SocialPlatforms.Impl;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
@@ -12,16 +13,20 @@ public class GameManager : MonoBehaviour
     public Rigidbody Ball;
 
     public Text ScoreText;
+    public Text highestScore;
     public GameObject GameOverText;
 
     private bool m_Started = false;
     private int m_Points;
 
     public bool m_GameOver = false;
+    public float diffValue;
 
     // Start is called before the first frame update
     void Start()
     {
+        highestScore.text = "Highest Score is: " + MainManager.Instance.scoreList[0] + " Made By: " + MainManager.Instance.nameList[0]  ;
+        diffValue = MainManager.Instance.difficultyVector;
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
 
@@ -50,7 +55,7 @@ public class GameManager : MonoBehaviour
                 forceDir.Normalize();
 
                 Ball.transform.SetParent(null);
-                Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
+                Ball.AddForce(forceDir * 2.0f * diffValue, ForceMode.VelocityChange);
             }
         }
         else if (m_GameOver)
